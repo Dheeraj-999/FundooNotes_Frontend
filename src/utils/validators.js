@@ -11,6 +11,9 @@ export function validateLogin({ email = '', password = '' } = {}) {
 export function validateRegister({ firstName = '', email = '', password = '' } = {}) {
   const errors = validateLogin({ email, password });
   if (!firstName.trim()) errors.firstName = 'First name is required';
+  if (password && password.length < 6) {
+    errors.password = 'Password must be at least 6 characters';
+  }
   return errors;
 }
 
