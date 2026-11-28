@@ -42,7 +42,8 @@ export function useReminderAlerts(reminders = [], notes = []) {
       let changed = false;
 
       reminders.forEach((reminder) => {
-        const id = String(reminder.id);
+        // Include the scheduled time so a rescheduled reminder can alert again.
+        const id = `${reminder.id}:${reminder.reminderTime}`;
         if (fired.has(id)) return;
 
         const dueAt = parseLocalDateTime(reminder.reminderTime)?.getTime();
