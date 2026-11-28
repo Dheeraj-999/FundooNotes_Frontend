@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useLabels } from '../hooks/useLabels';
 import { useNotes } from '../hooks/useNotes';
+import { useReminderAlerts } from '../hooks/useReminderAlerts';
 import { useReminders } from '../hooks/useReminders';
 import { getPageTitle } from '../utils/pageTitles';
 import Navbar from './Navbar';
@@ -19,6 +20,7 @@ export default function AppLayout() {
   const notesState = useNotes();
   const labelsState = useLabels();
   const remindersState = useReminders();
+  useReminderAlerts(remindersState.reminders, notesState.notes);
 
   useEffect(() => {
     document.title = getPageTitle(location.pathname);

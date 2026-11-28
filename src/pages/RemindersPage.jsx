@@ -2,7 +2,14 @@ import { useMemo, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { Bell, Clock, Pencil, Plus, Trash2 } from 'lucide-react';
 import EmptyState from '../components/EmptyState';
+import { useToast } from '../components/Toast';
 import { formatReminderTime, isPastReminder, parseLocalDateTime } from '../utils/dateTime';
+import {
+  getNotificationPermission,
+  playAlertSound,
+  requestNotificationPermission,
+  showBrowserNotification,
+} from '../utils/notifications';
 import { filterNotes } from '../utils/noteFilters';
 
 export default function RemindersPage() {
@@ -13,7 +20,9 @@ export default function RemindersPage() {
     deleteReminder,
     openReminder,
   } = useOutletContext();
+  const { showToast } = useToast();
   const [noteId, setNoteId] = useState('');
+  const [permission, setPermission] = useState(getNotificationPermission);
 
   const activeNotes = useMemo(
     () => filterNotes(notes, { archived: false, trashed: false }),
@@ -45,6 +54,20 @@ export default function RemindersPage() {
     openReminder?.(note, reminder);
   };
 
+  const handleEnableAlerts = async () => {
+    setPermission(await requestNotificationPermission());
+  };
+
+  const handleTestAlert = () => {
+    showToast('Test alert — this is how your reminders will appear.', 'info');
+    showBrowserNotification({
+      title: 'Fundoo Notes test alert',
+      body: 'Your reminder alerts are working.',
+      tag: 'fundoo-test-alert',
+    });
+    playAlertSound();
+  };
+
   return (
     <section className="page">
       <header className="page-header">
@@ -54,6 +77,32 @@ export default function RemindersPage() {
           <p className="page-subtitle">Little nudges for the things you don't want to forget.</p>
         </div>
       </header>
+
+      <div className="alert-settings">
+        <span className={`chip ${permission === 'granted' ? 'chip--upcoming' : 'chip--past'}`}>
+          Browser alerts:{' '}
+          {permission === 'granted'
+            ? 'On'
+            : permission === 'denied'
+              ? 'Blocked'
+              : permission === 'unsupported'
+                ? 'Unsupported'
+                : 'Off'}
+        </span>
+        {permission === 'default' && (
+          <button type="button" className="btn btn--ghost btn--small" onClick={handleEnableAlerts}>
+            Enable browser alerts
+          </button>
+        )}
+        <button type="button" className="btn btn--ghost btn--small" onClick={handleTestAlert}>
+          Test alert
+        </button>
+        {(permission === 'denied' || permission === 'unsupported') && (
+          <p className="reminder-compose__hint">
+            Desktop alerts aren't available here — email reminders still work.
+          </p>
+        )}
+      </div>
 
       <div className="reminder-compose">
         <div className="field">

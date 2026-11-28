@@ -82,6 +82,7 @@ sends a desired boolean.
 - Archive and trash views with unarchive/restore
 - Label create/rename/delete and assign/remove on notes
 - Reminder create/edit/delete with future-date validation
+- Reminder alerts: desktop notification + sound while the app is open, email backup at the due time
 - Excel note import with loading, empty, error and success feedback
 - Responsive design with mobile sidebar
 
@@ -94,6 +95,19 @@ never returned in an API response. SMTP credentials are configured on the backen
 with `APP_MAIL_USERNAME` and `APP_MAIL_PASSWORD` (see `MAIL_SETUP.md` in the backend
 repository). The old `/api/redis/otp/*` debug endpoints were removed because they
 exposed the code in HTTP responses.
+
+## Reminder alerts
+
+When a reminder is due, the app shows an in-app toast, a desktop notification and a
+short chime **if the tab is open**. Click **Enable browser alerts** on the Reminders
+page (or allow the prompt when saving a reminder) to grant permission; **Test alert**
+lets you verify it immediately.
+
+The backend also runs a scheduler every 30 seconds and emails each due reminder once,
+so you still get notified when the browser is closed. That requires the backend to stay
+running and SMTP to be configured (see `MAIL_SETUP.md` in the backend repository).
+The poll interval can be changed with the `APP_REMINDER_CHECK_INTERVAL_MS` environment
+variable on the backend.
 
 ## Not available in the backend API
 
