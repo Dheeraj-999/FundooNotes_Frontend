@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { SearchX } from 'lucide-react';
 import FilterBar from '../components/FilterBar';
+import LabelModal from '../components/LabelModal';
 import NoteCard from '../components/NoteCard';
 import NoteEditor from '../components/NoteEditor';
 import NoteList from '../components/NoteList';
@@ -18,8 +19,14 @@ export default function DashboardPage() {
     pinNote,
     archiveNote,
     trashNote,
+    labels = [],
+    addLabel,
+    assignLabel,
+    unassignLabel,
+    updateNoteLabels,
   } = useOutletContext();
   const [filter, setFilter] = useState('all');
+  const [labelNote, setLabelNote] = useState(null);
 
   const activeNotes = filterNotes(notes, { archived: false, trashed: false });
   const searchText = query.trim().toLowerCase();
@@ -33,6 +40,26 @@ export default function DashboardPage() {
     { id: 'all', label: 'All notes', count: activeNotes.length },
     { id: 'pinned', label: 'Pinned', count: activeNotes.filter((note) => note.pinned).length },
   ];
+
+  const handleAssignLabel = async (labelId) => {
+    const success = await assignLabel?.(labelId, labelNote.id);
+    if (!success || !labelNote) return;
+    const label = labels.find((item) => item.id === labelId);
+    const nextLabels = [
+      ...(labelNote.labels || []).filter((item) => item.id !== labelId),
+      ...(label ? [label] : []),
+    ];
+    updateNoteLabels?.(labelNote.id, nextLabels);
+    setLabelNote((current) => (current ? { ...current, labels: nextLabels } : current));
+  };
+
+  const handleRemoveLabel = async (labelId) => {
+    const success = await unassignLabel?.(labelId, labelNote.id);
+    if (!success || !labelNote) return;
+    const nextLabels = (labelNote.labels || []).filter((item) => item.id !== labelId);
+    updateNoteLabels?.(labelNote.id, nextLabels);
+    setLabelNote((current) => (current ? { ...current, labels: nextLabels } : current));
+  };
 
   return (
     <section className="page">
@@ -82,9 +109,21 @@ export default function DashboardPage() {
             onPin={pinNote}
             onArchive={archiveNote}
             onTrash={trashNote}
+            onManageLabels={setLabelNote}
           />
         )}
       />
+
+      {labelNote && (
+        <LabelModal
+          note={labelNote}
+          labels={labels}
+          onClose={() => setLabelNote(null)}
+          onAssign={handleAssignLabel}
+          onRemove={handleRemoveLabel}
+          onCreate={(name) => addLabel?.(name)}
+        />
+      )}
     </section>
   );
 }

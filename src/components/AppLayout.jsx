@@ -1,27 +1,64 @@
-import { useMemo, useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { useCallback, useMemo, useState } from 'react';
+import { Outlet, useNavigate } from 'react-router-dom';
+import { useLabels } from '../hooks/useLabels';
 import { useNotes } from '../hooks/useNotes';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 
-/** Shared shell: search state and one notes request for every protected page. */
+/** Shared shell: one notes request, one labels request, shared search and filters. */
 export default function AppLayout() {
   const [query, setQuery] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [selectedLabelId, setSelectedLabelId] = useState(null);
+  const navigate = useNavigate();
   const notesState = useNotes();
+  const labelsState = useLabels();
 
   const counts = useMemo(
     () => ({
       active: notesState.notes.filter((note) => !note.archived && !note.trashed).length,
       archived: notesState.notes.filter((note) => note.archived && !note.trashed).length,
       trashed: notesState.notes.filter((note) => note.trashed).length,
+      labels: labelsState.labels.length,
     }),
-    [notesState.notes],
+    [notesState.notes, labelsState.labels],
+  );
+
+  const selectLabel = useCallback(
+    (label) => {
+      setSelectedLabelId(label.id);
+      navigate('/labels');
+    },
+    [navigate],
+  );
+
+  const updateNoteLabels = useCallback(
+    (noteId, nextLabels) => {
+      notesState.setNotes((current) =>
+        current.map((note) => (note.id === noteId ? { ...note, labels: nextLabels } : note)),
+      );
+    },
+    [notesState.setNotes],
   );
 
   const outletContext = useMemo(
-    () => ({ query, setQuery, ...notesState }),
-    [query, notesState],
+    () => ({
+      query,
+      setQuery,
+      ...notesState,
+      labels: labelsState.labels,
+      labelsLoading: labelsState.loading,
+      addLabel: labelsState.addLabel,
+      renameLabel: labelsState.renameLabel,
+      deleteLabel: labelsState.deleteLabel,
+      assignLabel: labelsState.assignLabel,
+      unassignLabel: labelsState.unassignLabel,
+      selectedLabelId,
+      setSelectedLabelId,
+      selectLabel,
+      updateNoteLabels,
+    }),
+    [query, notesState, labelsState, selectedLabelId, selectLabel, updateNoteLabels],
   );
 
   return (
@@ -30,6 +67,9 @@ export default function AppLayout() {
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         counts={counts}
+        labels={labelsState.labels}
+        onSelectLabel={selectLabel}
+        activeLabelId={selectedLabelId}
       />
       {sidebarOpen && (
         <button
