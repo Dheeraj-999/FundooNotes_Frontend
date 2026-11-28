@@ -9,6 +9,7 @@ import DashboardPage from '../pages/DashboardPage';
 import ArchivePage from '../pages/ArchivePage';
 import TrashPage from '../pages/TrashPage';
 import LabelPage from '../pages/LabelPage';
+import RemindersPage from '../pages/RemindersPage';
 
 export default function AppRoutes() {
   return (
@@ -24,6 +25,7 @@ export default function AppRoutes() {
         <Route path="/archive" element={<ArchivePage />} />
         <Route path="/trash" element={<TrashPage />} />
         <Route path="/labels" element={<LabelPage />} />
+        <Route path="/reminders" element={<RemindersPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/dashboard" replace />} />

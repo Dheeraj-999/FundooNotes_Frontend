@@ -49,4 +49,13 @@ describe('NoteCard', () => {
     await user.click(screen.getByRole('button', { name: 'Restore note' }));
     expect(onRestore).toHaveBeenCalledWith(7);
   });
+
+  it('opens the reminder dialog with the whole note', async () => {
+    const user = userEvent.setup();
+    const onManageReminder = vi.fn();
+    render(<NoteCard note={note} onManageReminder={onManageReminder} />);
+
+    await user.click(screen.getByRole('button', { name: 'Set reminder' }));
+    expect(onManageReminder).toHaveBeenCalledWith(note);
+  });
 });

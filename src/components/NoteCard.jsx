@@ -1,6 +1,7 @@
 import {
   Archive,
   ArchiveRestore,
+  Bell,
   Pin,
   PinOff,
   RotateCcw,
@@ -32,6 +33,7 @@ export default function NoteCard({
   onTrash,
   onRestore,
   onManageLabels,
+  onManageReminder,
 }) {
   const labels = Array.isArray(note.labels) ? note.labels : [];
 
@@ -77,6 +79,13 @@ export default function NoteCard({
                 label={note.pinned ? 'Unpin note' : 'Pin note'}
                 onClick={() => onPin?.(note.id)}
               />
+              {onManageReminder && (
+                <ActionButton
+                  icon={Bell}
+                  label="Set reminder"
+                  onClick={() => onManageReminder(note)}
+                />
+              )}
               {onManageLabels && (
                 <ActionButton
                   icon={Tag}
