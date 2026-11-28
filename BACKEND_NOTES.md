@@ -9,7 +9,6 @@ gaps found while integrating, with the frontend workaround and the suggested fix
 | `GET /api/notes` returns active, archived and trashed notes; no filter, search, sort or pagination | Client-side filters on `archived` / `trashed` and client-side search | Add `GET /api/notes?archived=false&trashed=false&search=&labelId=&page=&size=` or dedicated endpoints |
 | No note update endpoint | Edit action is not shown | `PUT /api/notes/{noteId}` accepting `title` and `description` |
 | No permanent delete endpoint | Trash view offers restore only | `DELETE /api/notes/{noteId}` for hard delete |
-| No password reset / forgot-password endpoint | Screens explain that the feature is unavailable | Add `POST /api/users/forgot-password` and `POST /api/users/reset-password`; keep OTP server-side instead of returning it in `/api/redis/otp/generate` |
 | No color, collaborator or attachment resource | Not shown in the UI | Add fields/endpoints only if the product needs them; the current file endpoint is Excel import (`/api/batch/import/notes`) |
 | CORS allows only `http://localhost:5173` | Dev proxy avoids CORS; deployments must match | Make allowed origins configurable via an environment property so the same API can serve staging/production |
 | Missing `Authorization` header currently falls through to the generic 500 handler | Frontend always sends the header | Handle `MissingRequestHeaderException` explicitly and return 401 with the standard error DTO |
@@ -17,6 +16,15 @@ gaps found while integrating, with the frontend workaround and the suggested fix
 | No refresh token; JWT expires in 24 hours | Frontend clears the token on expired-session errors and asks the user to log in again | Add a refresh endpoint or shorter-lived tokens with refresh cookies |
 | Backend test properties were locally switched from H2 to MySQL | Not a frontend issue | Keep H2 for `@SpringBootTest` tests so `mvn test` runs without external services; restore `src/test/resources/application.properties` |
 | Datasource credentials and JWT secret are committed in properties | Not a frontend issue | Move them to environment variables / secrets |
+
+## Password reset (implemented on the backend)
+
+`POST /api/users/forgot-password` and `POST /api/users/reset-password` now back the
+frontend recovery flow. The OTP is generated server-side, stored in Redis with a TTL
+and emailed via SMTP; it is never returned in a response. The debug endpoints
+`POST /api/redis/otp/generate` and `/otp/verify` were removed because they returned
+the code to any caller. Configure `APP_MAIL_USERNAME` / `APP_MAIL_PASSWORD` before
+starting the backend — see `MAIL_SETUP.md` in the backend repository.
 
 ## Running the backend with the frontend
 

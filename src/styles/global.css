@@ -506,6 +506,19 @@ button {
   border-top: 1px dashed var(--line);
 }
 
+.notice-card strong {
+  color: var(--ink);
+}
+
+.notice-card--success .notice-card__icon {
+  background: #e8f8f0;
+  color: #138a4f;
+}
+
+.notice-card--success .btn {
+  margin-top: 22px;
+}
+
 /* ---------- Toast feedback ---------- */
 .toast-stack {
   position: fixed;

@@ -16,5 +16,8 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './src/test/setup.js',
     css: false,
+    // jsdom suites are memory-heavy; too many workers makes user-event time out.
+    maxWorkers: 2,
+    testTimeout: 15000,
   },
 });
