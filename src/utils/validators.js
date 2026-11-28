@@ -1,9 +1,15 @@
 export const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+export function validateEmail(value = '') {
+  if (!value.trim()) return 'Email is required';
+  if (!EMAIL_PATTERN.test(value.trim())) return 'Enter a valid email';
+  return '';
+}
+
 export function validateLogin({ email = '', password = '' } = {}) {
   const errors = {};
-  if (!email.trim()) errors.email = 'Email is required';
-  else if (!EMAIL_PATTERN.test(email.trim())) errors.email = 'Enter a valid email';
+  const emailError = validateEmail(email);
+  if (emailError) errors.email = emailError;
   if (!password) errors.password = 'Password is required';
   return errors;
 }
@@ -14,6 +20,32 @@ export function validateRegister({ firstName = '', email = '', password = '' } =
   if (password && password.length < 6) {
     errors.password = 'Password must be at least 6 characters';
   }
+  return errors;
+}
+
+export function validateForgotPassword({ email = '' } = {}) {
+  const errors = {};
+  const emailError = validateEmail(email);
+  if (emailError) errors.email = emailError;
+  return errors;
+}
+
+export function validateResetPassword({
+  email = '',
+  otp = '',
+  newPassword = '',
+  confirmPassword = '',
+} = {}) {
+  const errors = validateForgotPassword({ email });
+  const trimmedOtp = otp.trim();
+  if (!trimmedOtp) errors.otp = 'Verification code is required';
+  else if (!/^\d{6}$/.test(trimmedOtp)) errors.otp = 'Enter the 6-digit code';
+  if (!newPassword) errors.newPassword = 'New password is required';
+  else if (newPassword.length < 6) {
+    errors.newPassword = 'Password must be at least 6 characters';
+  }
+  if (!confirmPassword && newPassword) errors.confirmPassword = 'Confirm your new password';
+  else if (confirmPassword !== newPassword) errors.confirmPassword = 'Passwords do not match';
   return errors;
 }
 

@@ -2,9 +2,11 @@ import { describe, expect, it } from 'vitest';
 import {
   toBackendDateTime,
   toInputDateTime,
+  validateForgotPassword,
   validateLogin,
   validateRegister,
   validateReminderTime,
+  validateResetPassword,
 } from '../validators';
 
 describe('form validation', () => {
@@ -28,6 +30,27 @@ describe('form validation', () => {
     expect(errors.firstName).toBe('First name is required');
     expect(errors.password).toBe('Password must be at least 6 characters');
     expect(validateRegister({ firstName: 'Ada', email: 'ada@example.com', password: 'secret1' })).toEqual({});
+  });
+
+  it('validates the password recovery forms', () => {
+    expect(validateForgotPassword({ email: '' })).toEqual({ email: 'Email is required' });
+    expect(validateForgotPassword({ email: 'ada@example.com' })).toEqual({});
+    expect(validateResetPassword({
+      email: 'ada@example.com',
+      otp: '12',
+      newPassword: 'abc',
+      confirmPassword: 'xyz',
+    })).toEqual({
+      otp: 'Enter the 6-digit code',
+      newPassword: 'Password must be at least 6 characters',
+      confirmPassword: 'Passwords do not match',
+    });
+    expect(validateResetPassword({
+      email: 'ada@example.com',
+      otp: '123456',
+      newPassword: 'secret1',
+      confirmPassword: 'secret1',
+    })).toEqual({});
   });
 
   it('only accepts future reminder times', () => {

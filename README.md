@@ -77,6 +77,7 @@ sends a desired boolean.
 ## Features
 
 - Registration, login, JWT storage, logout and protected routes
+- Email OTP password reset (request code → verify → set new password)
 - Dashboard with note editor, card grid, search, pin/archive/trash actions
 - Archive and trash views with unarchive/restore
 - Label create/rename/delete and assign/remove on notes
@@ -84,13 +85,22 @@ sends a desired boolean.
 - Excel note import with loading, empty, error and success feedback
 - Responsive design with mobile sidebar
 
+## Password reset
+
+The recovery flow calls `POST /api/users/forgot-password` with `{ email }`, then
+`POST /api/users/reset-password` with `{ email, otp, newPassword }`. The backend
+emails a 6-digit code over SMTP and stores it in Redis for 5 minutes; the code is
+never returned in an API response. SMTP credentials are configured on the backend
+with `APP_MAIL_USERNAME` and `APP_MAIL_PASSWORD` (see `MAIL_SETUP.md` in the backend
+repository). The old `/api/redis/otp/*` debug endpoints were removed because they
+exposed the code in HTTP responses.
+
 ## Not available in the backend API
 
 These study-guide ideas are intentionally **not** faked in the UI: note editing and
 permanent deletion, server-side search/pagination, colors, collaborators, logout
-blacklisting, and password reset. The OTP endpoints under `/api/redis/otp/*` are
-debug utilities (they return the OTP in the response) and are not used for account
-recovery. See `BACKEND_NOTES.md` for recommended backend additions.
+blacklisting, and attachments. See `BACKEND_NOTES.md` for recommended backend
+additions.
 
 ## Branches
 

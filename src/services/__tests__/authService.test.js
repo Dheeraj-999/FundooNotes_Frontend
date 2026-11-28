@@ -5,7 +5,7 @@ vi.mock('../../utils/apiClient', () => ({
 }));
 
 import apiClient from '../../utils/apiClient';
-import { loginUser, registerUser } from '../authService';
+import { loginUser, registerUser, requestPasswordReset, resetPassword } from '../authService';
 
 describe('authService', () => {
   beforeEach(() => vi.clearAllMocks());
@@ -31,5 +31,23 @@ describe('authService', () => {
       message: 'Login successful',
     });
     expect(apiClient.post).toHaveBeenCalledWith('/users/login', credentials);
+  });
+
+  it('posts the password recovery requests to the reset endpoints', async () => {
+    apiClient.post.mockResolvedValue({ data: { message: 'Code sent' } });
+
+    await expect(requestPasswordReset({ email: 'ada@example.com' }))
+      .resolves.toEqual({ message: 'Code sent' });
+    expect(apiClient.post).toHaveBeenCalledWith('/users/forgot-password', { email: 'ada@example.com' });
+
+    const resetPayload = {
+      email: 'ada@example.com',
+      otp: '123456',
+      newPassword: 'secret1',
+    };
+    apiClient.post.mockResolvedValue({ data: { message: 'Password updated successfully' } });
+    await expect(resetPassword(resetPayload))
+      .resolves.toEqual({ message: 'Password updated successfully' });
+    expect(apiClient.post).toHaveBeenCalledWith('/users/reset-password', resetPayload);
   });
 });
