@@ -23,6 +23,7 @@ describe('TrashPage', () => {
       error: '',
       reload: vi.fn(),
       restoreNote: vi.fn(),
+      deleteNoteForever: vi.fn().mockResolvedValue(true),
     };
   });
 
@@ -39,5 +40,19 @@ describe('TrashPage', () => {
     render(<TrashPage />);
     await user.click(screen.getByRole('button', { name: 'Restore note' }));
     await waitFor(() => expect(contextHolder.value.restoreNote).toHaveBeenCalledWith(9));
+  });
+
+  it('confirms before permanently deleting a trashed note', async () => {
+    const user = userEvent.setup();
+    render(<TrashPage />);
+
+    await user.click(screen.getByRole('button', { name: 'Delete permanently' }));
+    expect(screen.getByRole('alertdialog')).toBeInTheDocument();
+    expect(screen.getByText(/will be permanently removed/)).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Delete forever' }));
+    await waitFor(() =>
+      expect(contextHolder.value.deleteNoteForever).toHaveBeenCalledWith(9),
+    );
   });
 });

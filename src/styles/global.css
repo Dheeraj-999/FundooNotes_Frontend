@@ -1530,10 +1530,15 @@ button {
   gap: 18px;
 }
 
-.reminder-form__actions {
+.reminder-form__actions,
+.confirm-dialog__actions {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
+}
+
+.confirm-dialog__actions {
+  margin-top: 20px;
 }
 
 /* ---------- Reminders ---------- */

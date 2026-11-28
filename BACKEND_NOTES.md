@@ -7,8 +7,8 @@ gaps found while integrating, with the frontend workaround and the suggested fix
 | Gap | Frontend workaround | Suggested backend change |
 | --- | --- | --- |
 | `GET /api/notes` returns active, archived and trashed notes; no filter, search, sort or pagination | Client-side filters on `archived` / `trashed` and client-side search | Add `GET /api/notes?archived=false&trashed=false&search=&labelId=&page=&size=` or dedicated endpoints |
-| No note update endpoint | Edit action is not shown | `PUT /api/notes/{noteId}` accepting `title` and `description` |
-| No permanent delete endpoint | Trash view offers restore only | `DELETE /api/notes/{noteId}` for hard delete |
+| Note update endpoint (was missing) | Edit dialog calls `PUT /api/notes/{noteId}` with `title` and `description` | Implemented on the backend; trims the title and preserves labels |
+| Permanent delete endpoint (was missing) | Trash offers restore and a confirmed "Delete forever" action | Implemented as `DELETE /api/notes/{noteId}`; only trashed notes are accepted, and dependent reminders are removed first |
 | No color, collaborator or attachment resource | Not shown in the UI | Add fields/endpoints only if the product needs them; the current file endpoint is Excel import (`/api/batch/import/notes`) |
 | CORS allows only `http://localhost:5173` | Dev proxy avoids CORS; deployments must match | Make allowed origins configurable via an environment property so the same API can serve staging/production |
 | Missing `Authorization` header currently falls through to the generic 500 handler | Frontend always sends the header | Handle `MissingRequestHeaderException` explicitly and return 401 with the standard error DTO |

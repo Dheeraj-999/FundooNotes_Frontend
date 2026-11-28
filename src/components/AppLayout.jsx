@@ -6,6 +6,7 @@ import { useReminderAlerts } from '../hooks/useReminderAlerts';
 import { useReminders } from '../hooks/useReminders';
 import { getPageTitle } from '../utils/pageTitles';
 import Navbar from './Navbar';
+import NoteEditor from './NoteEditor';
 import ReminderModal from './ReminderModal';
 import Sidebar from './Sidebar';
 
@@ -15,6 +16,7 @@ export default function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedLabelId, setSelectedLabelId] = useState(null);
   const [reminderTarget, setReminderTarget] = useState(null);
+  const [editingNote, setEditingNote] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
   const notesState = useNotes();
@@ -48,6 +50,18 @@ export default function AppLayout() {
   const openReminder = useCallback((note, reminder = null) => {
     setReminderTarget({ note, reminder });
   }, []);
+
+  const openEditor = useCallback((note) => {
+    setEditingNote(note);
+  }, []);
+
+  const saveEditedNote = useCallback(
+    (payload) => {
+      if (!editingNote) return Promise.resolve(null);
+      return notesState.editNote(editingNote.id, payload);
+    },
+    [editingNote, notesState],
+  );
 
   const updateNoteLabels = useCallback(
     (noteId, nextLabels) => {
@@ -92,6 +106,7 @@ export default function AppLayout() {
       updateReminder: remindersState.updateReminder,
       deleteReminder: remindersState.deleteReminder,
       openReminder,
+      openEditor,
     }),
     [
       query,
@@ -102,6 +117,7 @@ export default function AppLayout() {
       selectLabel,
       updateNoteLabels,
       openReminder,
+      openEditor,
     ],
   );
 
@@ -142,6 +158,14 @@ export default function AppLayout() {
           reminder={reminderTarget.reminder}
           onSave={saveReminder}
           onClose={() => setReminderTarget(null)}
+        />
+      )}
+
+      {editingNote && (
+        <NoteEditor
+          note={editingNote}
+          onSave={saveEditedNote}
+          onClose={() => setEditingNote(null)}
         />
       )}
     </div>

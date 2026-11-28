@@ -58,4 +58,23 @@ describe('NoteCard', () => {
     await user.click(screen.getByRole('button', { name: 'Set reminder' }));
     expect(onManageReminder).toHaveBeenCalledWith(note);
   });
+
+  it('opens the editor with the whole note', async () => {
+    const user = userEvent.setup();
+    const onEdit = vi.fn();
+    render(<NoteCard note={note} onEdit={onEdit} />);
+
+    await user.click(screen.getByRole('button', { name: 'Edit note' }));
+    expect(onEdit).toHaveBeenCalledWith(note);
+  });
+
+  it('offers permanent deletion in the trash view', async () => {
+    const user = userEvent.setup();
+    const onDeleteForever = vi.fn();
+    const trashed = { ...note, trashed: true };
+    render(<NoteCard note={trashed} view="trash" onDeleteForever={onDeleteForever} />);
+
+    await user.click(screen.getByRole('button', { name: 'Delete permanently' }));
+    expect(onDeleteForever).toHaveBeenCalledWith(trashed);
+  });
 });

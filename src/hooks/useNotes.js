@@ -2,10 +2,12 @@ import { useCallback, useEffect, useState } from 'react';
 import { useToast } from '../components/Toast';
 import {
   createNote as createNoteApi,
+  deleteNote as deleteNoteApi,
   getAllNotes,
   toggleArchiveNote,
   togglePinNote,
   toggleTrashNote,
+  updateNote as updateNoteApi,
 } from '../services/noteService';
 import { getErrorMessage } from '../utils/errors';
 
@@ -45,6 +47,38 @@ export function useNotes() {
       } catch (requestError) {
         showToast(getErrorMessage(requestError, 'Unable to create the note.'), 'error');
         return null;
+      }
+    },
+    [showToast],
+  );
+
+  const editNote = useCallback(
+    async (noteId, payload) => {
+      try {
+        const updated = await updateNoteApi(noteId, payload);
+        setNotes((current) =>
+          current.map((note) => (note.id === updated.id ? updated : note)),
+        );
+        showToast('Note updated');
+        return updated;
+      } catch (requestError) {
+        showToast(getErrorMessage(requestError, 'Unable to update the note.'), 'error');
+        return null;
+      }
+    },
+    [showToast],
+  );
+
+  const deleteNoteForever = useCallback(
+    async (noteId) => {
+      try {
+        await deleteNoteApi(noteId);
+        setNotes((current) => current.filter((note) => note.id !== noteId));
+        showToast('Note permanently deleted');
+        return true;
+      } catch (requestError) {
+        showToast(getErrorMessage(requestError, 'Unable to delete the note.'), 'error');
+        return false;
       }
     },
     [showToast],
@@ -95,6 +129,8 @@ export function useNotes() {
     error,
     reload: loadNotes,
     addNote,
+    editNote,
+    deleteNoteForever,
     pinNote,
     archiveNote,
     unarchiveNote,

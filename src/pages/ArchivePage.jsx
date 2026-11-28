@@ -13,6 +13,7 @@ export default function ArchivePage() {
     reload,
     unarchiveNote,
     trashNote,
+    openEditor,
   } = useOutletContext();
 
   const archivedNotes = filterNotes(notes, {
@@ -55,6 +56,7 @@ export default function ArchivePage() {
             key={note.id}
             note={note}
             view="archive"
+            onEdit={openEditor}
             onUnarchive={unarchiveNote}
             onTrash={trashNote}
           />
