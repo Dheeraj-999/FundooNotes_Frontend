@@ -1537,6 +1537,22 @@ button {
 }
 
 /* ---------- Reminders ---------- */
+.alert-settings {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, #fff, #f7f7ff);
+}
+
+.alert-settings .reminder-compose__hint {
+  flex-basis: 100%;
+}
+
 .reminder-compose {
   display: flex;
   align-items: flex-start;

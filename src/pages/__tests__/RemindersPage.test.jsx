@@ -9,6 +9,8 @@ vi.mock('react-router-dom', async (importOriginal) => {
   return { ...actual, useOutletContext: () => contextHolder.value };
 });
 
+vi.mock('../../components/Toast', () => ({ useToast: () => ({ showToast: vi.fn() }) }));
+
 import RemindersPage from '../RemindersPage';
 
 describe('RemindersPage', () => {
@@ -44,6 +46,12 @@ describe('RemindersPage', () => {
     const options = screen.getAllByRole('option').map((option) => option.textContent);
     expect(options).toContain('Launch plan');
     expect(options).not.toContain('Old idea');
+  });
+
+  it('offers a test alert so browser notifications can be verified', () => {
+    render(<RemindersPage />);
+    expect(screen.getByRole('button', { name: 'Test alert' })).toBeInTheDocument();
+    expect(screen.getByText(/Browser alerts:/)).toBeInTheDocument();
   });
 
   it('opens the modal for creation, editing and deletion', async () => {

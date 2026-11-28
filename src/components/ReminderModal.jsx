@@ -5,6 +5,7 @@ import {
   toInputDateTime,
   validateReminderTime,
 } from '../utils/validators';
+import { requestNotificationPermission } from '../utils/notifications';
 
 export default function ReminderModal({ note, reminder, onSave, onClose }) {
   const [value, setValue] = useState(toInputDateTime(reminder?.reminderTime));
@@ -16,6 +17,8 @@ export default function ReminderModal({ note, reminder, onSave, onClose }) {
     setError(validationError);
     if (validationError) return;
 
+    // Browsers only allow this prompt from a user gesture (the save click).
+    requestNotificationPermission();
     const saved = await onSave?.(toBackendDateTime(value));
     if (saved) onClose?.();
   };
