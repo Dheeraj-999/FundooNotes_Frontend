@@ -3,17 +3,21 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mockApi = vi.hoisted(() => ({
   get: vi.fn(),
   post: vi.fn(),
+  put: vi.fn(),
   patch: vi.fn(),
+  delete: vi.fn(),
 }));
 
 vi.mock('../../utils/apiClient', () => ({ default: mockApi }));
 
 import {
   createNote,
+  deleteNote,
   getAllNotes,
   toggleArchiveNote,
   togglePinNote,
   toggleTrashNote,
+  updateNote,
 } from '../noteService';
 
 describe('noteService', () => {
@@ -22,6 +26,8 @@ describe('noteService', () => {
   it('uses the exact note endpoints', async () => {
     mockApi.get.mockResolvedValue({ data: [{ id: 1 }] });
     mockApi.post.mockResolvedValue({ data: { id: 2 } });
+    mockApi.put.mockResolvedValue({ data: { id: 1, title: 'Updated' } });
+    mockApi.delete.mockResolvedValue({ data: '' });
     mockApi.patch.mockResolvedValue({ data: { id: 3 } });
 
     await expect(getAllNotes()).resolves.toEqual([{ id: 1 }]);
@@ -29,6 +35,15 @@ describe('noteService', () => {
 
     await expect(createNote({ title: 'Idea' })).resolves.toEqual({ id: 2 });
     expect(mockApi.post).toHaveBeenCalledWith('/notes', { title: 'Idea' });
+
+    await expect(updateNote(1, { title: 'Updated', description: '' })).resolves.toEqual({
+      id: 1,
+      title: 'Updated',
+    });
+    expect(mockApi.put).toHaveBeenCalledWith('/notes/1', { title: 'Updated', description: '' });
+
+    await deleteNote(1);
+    expect(mockApi.delete).toHaveBeenCalledWith('/notes/1');
 
     await togglePinNote(3);
     expect(mockApi.patch).toHaveBeenCalledWith('/notes/3/pin');

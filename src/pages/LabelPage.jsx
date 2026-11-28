@@ -23,6 +23,7 @@ export default function LabelPage() {
     archiveNote,
     trashNote,
     openReminder,
+    openEditor,
   } = useOutletContext();
 
   const [name, setName] = useState('');
@@ -204,6 +205,7 @@ export default function LabelPage() {
                 onPin={pinNote}
                 onArchive={archiveNote}
                 onTrash={trashNote}
+                onEdit={openEditor}
                 onManageReminder={openReminder}
               />
             )}

@@ -61,7 +61,7 @@ remain presentational and easy to test.
 | Feature | Endpoints used by the UI |
 | --- | --- |
 | Auth | `POST /users/register`, `POST /users/login` |
-| Notes | `GET /notes`, `POST /notes`, `PATCH /notes/{id}/pin`, `PATCH /notes/{id}/archive`, `PATCH /notes/{id}/trash` |
+| Notes | `GET /notes`, `POST /notes`, `PUT /notes/{id}`, `DELETE /notes/{id}`, `PATCH /notes/{id}/pin`, `PATCH /notes/{id}/archive`, `PATCH /notes/{id}/trash` |
 | Labels | `GET /labels`, `POST /labels`, `PUT /labels/{id}`, `DELETE /labels/{id}`, `POST /labels/{labelId}/notes/{noteId}`, `DELETE /labels/{labelId}/notes/{noteId}` |
 | Reminders | `GET /reminders`, `POST /reminders`, `PUT /reminders/{id}`, `DELETE /reminders/{id}` |
 | Import | `POST /batch/import/notes` (multipart field `file`, `.xlsx` only) |
@@ -79,7 +79,8 @@ sends a desired boolean.
 - Registration, login, JWT storage, logout and protected routes
 - Email OTP password reset (request code → verify → set new password)
 - Dashboard with note editor, card grid, search, pin/archive/trash actions
-- Archive and trash views with unarchive/restore
+- Edit any active or archived note in a dialog, with validation and trimmed values
+- Archive and trash views with unarchive/restore and confirmed permanent deletion
 - Label create/rename/delete and assign/remove on notes
 - Reminder create/edit/delete with future-date validation
 - Reminder alerts: desktop notification + sound while the app is open, email backup at the due time
@@ -96,6 +97,15 @@ with `APP_MAIL_USERNAME` and `APP_MAIL_PASSWORD` (see `MAIL_SETUP.md` in the bac
 repository). The old `/api/redis/otp/*` debug endpoints were removed because they
 exposed the code in HTTP responses.
 
+## Note editing and deletion
+
+Click the pencil icon on any active or archived note to open the edit dialog. The
+form is prefilled with the saved title and description; saving sends
+`PUT /api/notes/{id}` and updates the card immediately. In Trash, the bin icon asks
+for confirmation before calling `DELETE /api/notes/{id}`. The backend only deletes
+notes that are already in trash and removes their reminders first, so no orphaned
+rows are left behind.
+
 ## Reminder alerts
 
 When a reminder is due, the app shows an in-app toast, a desktop notification and a
@@ -111,10 +121,9 @@ variable on the backend.
 
 ## Not available in the backend API
 
-These study-guide ideas are intentionally **not** faked in the UI: note editing and
-permanent deletion, server-side search/pagination, colors, collaborators, logout
-blacklisting, and attachments. See `BACKEND_NOTES.md` for recommended backend
-additions.
+These study-guide ideas are intentionally **not** faked in the UI: server-side
+search/pagination, colors, collaborators, logout blacklisting, and attachments.
+See `BACKEND_NOTES.md` for the remaining backend gaps.
 
 ## Branches
 

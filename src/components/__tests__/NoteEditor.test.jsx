@@ -33,4 +33,30 @@ describe('NoteEditor', () => {
       expect(screen.queryByRole('button', { name: 'Save note' })).not.toBeInTheDocument();
     });
   });
+
+  it('prefills a saved note and saves edited values', async () => {
+    const user = userEvent.setup();
+    const onSave = vi.fn().mockResolvedValue({ id: 7 });
+    const onClose = vi.fn();
+    render(
+      <NoteEditor
+        note={{ id: 7, title: 'Old title', description: 'Old body' }}
+        onSave={onSave}
+        onClose={onClose}
+      />,
+    );
+
+    expect(screen.getByRole('dialog', { name: 'Edit note' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Title')).toHaveValue('Old title');
+    expect(screen.getByLabelText('Description')).toHaveValue('Old body');
+
+    await user.clear(screen.getByLabelText('Title'));
+    await user.type(screen.getByLabelText('Title'), '  New title  ');
+    await user.click(screen.getByRole('button', { name: 'Save changes' }));
+
+    await waitFor(() =>
+      expect(onSave).toHaveBeenCalledWith({ title: 'New title', description: 'Old body' }),
+    );
+    expect(onClose).toHaveBeenCalled();
+  });
 });

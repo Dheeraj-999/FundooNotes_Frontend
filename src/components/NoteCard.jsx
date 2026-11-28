@@ -2,6 +2,7 @@ import {
   Archive,
   ArchiveRestore,
   Bell,
+  Pencil,
   Pin,
   PinOff,
   RotateCcw,
@@ -27,11 +28,13 @@ function ActionButton({ icon: Icon, label, onClick }) {
 export default function NoteCard({
   note,
   view = 'active',
+  onEdit,
   onPin,
   onArchive,
   onUnarchive,
   onTrash,
   onRestore,
+  onDeleteForever,
   onManageLabels,
   onManageReminder,
 }) {
@@ -62,7 +65,14 @@ export default function NoteCard({
         </span>
         <div className="note-card__actions">
           {view === 'trash' ? (
-            <ActionButton icon={RotateCcw} label="Restore note" onClick={() => onRestore?.(note.id)} />
+            <>
+              <ActionButton icon={RotateCcw} label="Restore note" onClick={() => onRestore?.(note.id)} />
+              <ActionButton
+                icon={Trash2}
+                label="Delete permanently"
+                onClick={() => onDeleteForever?.(note)}
+              />
+            </>
           ) : view === 'archive' ? (
             <>
               <ActionButton
@@ -70,6 +80,9 @@ export default function NoteCard({
                 label="Unarchive note"
                 onClick={() => onUnarchive?.(note.id)}
               />
+              {onEdit && (
+                <ActionButton icon={Pencil} label="Edit note" onClick={() => onEdit(note)} />
+              )}
               <ActionButton icon={Trash2} label="Move to trash" onClick={() => onTrash?.(note.id)} />
             </>
           ) : (
@@ -79,6 +92,9 @@ export default function NoteCard({
                 label={note.pinned ? 'Unpin note' : 'Pin note'}
                 onClick={() => onPin?.(note.id)}
               />
+              {onEdit && (
+                <ActionButton icon={Pencil} label="Edit note" onClick={() => onEdit(note)} />
+              )}
               {onManageReminder && (
                 <ActionButton
                   icon={Bell}

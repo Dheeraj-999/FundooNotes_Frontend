@@ -25,6 +25,7 @@ export default function DashboardPage() {
     unassignLabel,
     updateNoteLabels,
     openReminder,
+    openEditor,
   } = useOutletContext();
   const [filter, setFilter] = useState('all');
   const [labelNote, setLabelNote] = useState(null);
@@ -107,6 +108,7 @@ export default function DashboardPage() {
           <NoteCard
             key={note.id}
             note={note}
+            onEdit={openEditor}
             onPin={pinNote}
             onArchive={archiveNote}
             onTrash={trashNote}
