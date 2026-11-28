@@ -24,6 +24,7 @@ export default function DashboardPage() {
     assignLabel,
     unassignLabel,
     updateNoteLabels,
+    openReminder,
   } = useOutletContext();
   const [filter, setFilter] = useState('all');
   const [labelNote, setLabelNote] = useState(null);
@@ -110,6 +111,7 @@ export default function DashboardPage() {
             onArchive={archiveNote}
             onTrash={trashNote}
             onManageLabels={setLabelNote}
+            onManageReminder={openReminder}
           />
         )}
       />

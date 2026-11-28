@@ -2,17 +2,21 @@ import { useCallback, useMemo, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useLabels } from '../hooks/useLabels';
 import { useNotes } from '../hooks/useNotes';
+import { useReminders } from '../hooks/useReminders';
 import Navbar from './Navbar';
+import ReminderModal from './ReminderModal';
 import Sidebar from './Sidebar';
 
-/** Shared shell: one notes request, one labels request, shared search and filters. */
+/** Shared shell: one request per resource, shared search and one reminder dialog. */
 export default function AppLayout() {
   const [query, setQuery] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedLabelId, setSelectedLabelId] = useState(null);
+  const [reminderTarget, setReminderTarget] = useState(null);
   const navigate = useNavigate();
   const notesState = useNotes();
   const labelsState = useLabels();
+  const remindersState = useReminders();
 
   const counts = useMemo(
     () => ({
@@ -20,8 +24,9 @@ export default function AppLayout() {
       archived: notesState.notes.filter((note) => note.archived && !note.trashed).length,
       trashed: notesState.notes.filter((note) => note.trashed).length,
       labels: labelsState.labels.length,
+      reminders: remindersState.reminders.length,
     }),
-    [notesState.notes, labelsState.labels],
+    [notesState.notes, labelsState.labels, remindersState.reminders],
   );
 
   const selectLabel = useCallback(
@@ -32,6 +37,10 @@ export default function AppLayout() {
     [navigate],
   );
 
+  const openReminder = useCallback((note, reminder = null) => {
+    setReminderTarget({ note, reminder });
+  }, []);
+
   const updateNoteLabels = useCallback(
     (noteId, nextLabels) => {
       notesState.setNotes((current) =>
@@ -39,6 +48,17 @@ export default function AppLayout() {
       );
     },
     [notesState.setNotes],
+  );
+
+  const saveReminder = useCallback(
+    (reminderTime) => {
+      if (!reminderTarget) return Promise.resolve(null);
+      const { note, reminder } = reminderTarget;
+      return reminder
+        ? remindersState.updateReminder(reminder.id, reminderTime)
+        : remindersState.addReminder(note.id, reminderTime);
+    },
+    [reminderTarget, remindersState],
   );
 
   const outletContext = useMemo(
@@ -57,8 +77,24 @@ export default function AppLayout() {
       setSelectedLabelId,
       selectLabel,
       updateNoteLabels,
+      reminders: remindersState.reminders,
+      remindersLoading: remindersState.loading,
+      reloadReminders: remindersState.loadReminders,
+      addReminder: remindersState.addReminder,
+      updateReminder: remindersState.updateReminder,
+      deleteReminder: remindersState.deleteReminder,
+      openReminder,
     }),
-    [query, notesState, labelsState, selectedLabelId, selectLabel, updateNoteLabels],
+    [
+      query,
+      notesState,
+      labelsState,
+      remindersState,
+      selectedLabelId,
+      selectLabel,
+      updateNoteLabels,
+      openReminder,
+    ],
   );
 
   return (
@@ -90,6 +126,15 @@ export default function AppLayout() {
           <Outlet context={outletContext} />
         </main>
       </div>
+
+      {reminderTarget && (
+        <ReminderModal
+          note={reminderTarget.note}
+          reminder={reminderTarget.reminder}
+          onSave={saveReminder}
+          onClose={() => setReminderTarget(null)}
+        />
+      )}
     </div>
   );
 }
