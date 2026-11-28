@@ -71,8 +71,9 @@ the UI never pretends a capability exists when the backend does not provide it.
 - **Search** across titles and descriptions, with instant client-side results.
 - **Filter chips** for all, pinned and labelled notes, with live counts.
 - **Pin / archive / trash** toggles on every note card.
+- **Edit notes**: click the pencil icon on any active or archived note to change its title and description in a dialog.
 - **Archive view** with unarchive and delete actions.
-- **Trash view** with restore and permanent-remove actions where the API supports them.
+- **Trash view** with restore and a confirmed **Delete forever** action that permanently removes the note.
 - **Labels**: create, rename and delete labels; assign or remove labels on a note; browse notes by label.
 - **Empty states** with helpful calls to action instead of blank screens.
 
@@ -175,6 +176,12 @@ Captured from the running application with representative sample data.
 | --- | --- |
 | ![Reminders view](docs/screenshots/08-reminders.png) | ![Import screen](docs/screenshots/09-import.png) |
 
+### Editing and permanent deletion
+
+| Edit note dialog | Delete confirmation |
+| --- | --- |
+| ![Edit note dialog](docs/screenshots/11-edit-note.png) | ![Delete confirmation](docs/screenshots/12-delete-confirmation.png) |
+
 ---
 
 ## 6. Project structure
@@ -192,7 +199,9 @@ FundooNotes_Frontend/
 │       ├── 07-labels.png
 │       ├── 08-reminders.png
 │       ├── 09-import.png
-│       └── 10-reset-password.png
+│       ├── 10-reset-password.png
+│       ├── 11-edit-note.png
+│       └── 12-delete-confirmation.png
 ├── index.html                  Vite entry document
 ├── package.json                Scripts and dependencies
 ├── vite.config.js              React plugin, dev proxy and Vitest config
@@ -322,7 +331,7 @@ All paths are relative to `/api`. Responses are JSON; errors follow
 | --- | --- |
 | Authentication | `POST /users/register`, `POST /users/login` |
 | Password recovery | `POST /users/forgot-password`, `POST /users/reset-password` |
-| Notes | `GET /notes`, `POST /notes`, `PATCH /notes/{id}/pin`, `PATCH /notes/{id}/archive`, `PATCH /notes/{id}/trash` |
+| Notes | `GET /notes`, `POST /notes`, `PUT /notes/{id}`, `DELETE /notes/{id}`, `PATCH /notes/{id}/pin`, `PATCH /notes/{id}/archive`, `PATCH /notes/{id}/trash` |
 | Labels | `GET /labels`, `POST /labels`, `PUT /labels/{id}`, `DELETE /labels/{id}`, `POST /labels/{labelId}/notes/{noteId}`, `DELETE /labels/{labelId}/notes/{noteId}` |
 | Reminders | `GET /reminders`, `POST /reminders`, `PUT /reminders/{id}`, `DELETE /reminders/{id}` |
 | Excel import | `POST /batch/import/notes` (multipart field `file`, `.xlsx` only) |
@@ -346,6 +355,10 @@ Representative payload shapes:
 
 Reminder times are local `LocalDateTime` strings without a timezone suffix.
 
+Editing uses the same `{ title, description }` payload as creation. Permanent deletion
+is accepted only for notes already in trash; the backend removes dependent reminders
+and label links first so no orphaned rows remain.
+
 ---
 
 ## 10. Authentication and security
@@ -365,7 +378,7 @@ Reminder times are local `LocalDateTime` strings without a timezone suffix.
 npm run check
 ```
 
-Current result: **34 test files, 80 tests passing**, followed by a successful
+Current result: **34 test files, 85 tests passing**, followed by a successful
 `vite build` (~1778 modules transformed).
 
 Coverage includes:
@@ -404,6 +417,7 @@ Windows.
 | `feature/password-reset` | `5c36e5b` | Email OTP password recovery |
 | `feature/reminder-alerts` | `b58c9c2` | Browser notifications, chime and alert settings |
 | `fix/reminder-alert-reschedule` | `20444f8` | Re-arm browser alerts after editing a reminder |
+| `feature/note-edit-delete` | `c412a77` | Edit notes and permanently delete from trash |
 
 To work on the application:
 
@@ -419,7 +433,6 @@ git checkout -b feature/<use-case>
 
 These are deliberate boundaries of the current backend API, not UI bugs:
 
-- Note editing and permanent deletion are not exposed because the API has no matching endpoints.
 - Search and pagination are client-side; the backend has no filter/search endpoint.
 - Note colours, collaborators and attachments are not available.
 - Logout clears the local token but does not blacklist it server-side.
