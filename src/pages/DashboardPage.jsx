@@ -5,6 +5,7 @@ import FilterBar from '../components/FilterBar';
 import NoteCard from '../components/NoteCard';
 import NoteEditor from '../components/NoteEditor';
 import NoteList from '../components/NoteList';
+import { filterNotes } from '../utils/noteFilters';
 
 export default function DashboardPage() {
   const {
@@ -20,16 +21,9 @@ export default function DashboardPage() {
   } = useOutletContext();
   const [filter, setFilter] = useState('all');
 
-  const activeNotes = notes.filter((note) => !note.archived && !note.trashed);
+  const activeNotes = filterNotes(notes, { archived: false, trashed: false });
   const searchText = query.trim().toLowerCase();
-  const matchingNotes = activeNotes.filter((note) => {
-    if (!searchText) return true;
-    return (
-      note.title.toLowerCase().includes(searchText) ||
-      (note.description || '').toLowerCase().includes(searchText) ||
-      (note.labels || []).some((label) => label.name.toLowerCase().includes(searchText))
-    );
-  });
+  const matchingNotes = filterNotes(activeNotes, { query });
   const visibleNotes = (filter === 'pinned'
     ? matchingNotes.filter((note) => note.pinned)
     : matchingNotes
