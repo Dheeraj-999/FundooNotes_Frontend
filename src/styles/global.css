@@ -1269,3 +1269,23 @@ button {
     font-size: 1.6rem;
   }
 }
+
+/* ---------- Page banners ---------- */
+.section-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+  padding: 12px 15px;
+  border: 1px solid #dcdcf8;
+  border-radius: 12px;
+  background: #f7f7ff;
+  color: #5a5f88;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.section-banner svg {
+  flex: 0 0 auto;
+  color: var(--primary);
+}
