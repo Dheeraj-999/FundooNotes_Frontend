@@ -1,8 +1,9 @@
-import { useCallback, useMemo, useState } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useLabels } from '../hooks/useLabels';
 import { useNotes } from '../hooks/useNotes';
 import { useReminders } from '../hooks/useReminders';
+import { getPageTitle } from '../utils/pageTitles';
 import Navbar from './Navbar';
 import ReminderModal from './ReminderModal';
 import Sidebar from './Sidebar';
@@ -14,9 +15,14 @@ export default function AppLayout() {
   const [selectedLabelId, setSelectedLabelId] = useState(null);
   const [reminderTarget, setReminderTarget] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
   const notesState = useNotes();
   const labelsState = useLabels();
   const remindersState = useReminders();
+
+  useEffect(() => {
+    document.title = getPageTitle(location.pathname);
+  }, [location.pathname]);
 
   const counts = useMemo(
     () => ({
@@ -99,6 +105,7 @@ export default function AppLayout() {
 
   return (
     <div className="app-shell">
+      <a className="skip-link" href="#main-content">Skip to content</a>
       <Sidebar
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
@@ -122,7 +129,7 @@ export default function AppLayout() {
           onQueryChange={setQuery}
           onMenuClick={() => setSidebarOpen(true)}
         />
-        <main className="content">
+        <main id="main-content" className="content">
           <Outlet context={outletContext} />
         </main>
       </div>

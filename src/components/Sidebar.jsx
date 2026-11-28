@@ -1,4 +1,4 @@
-import { Archive, Bell, Lightbulb, Plus, Tag, Trash2, X } from 'lucide-react';
+import { Archive, Bell, FileUp, Lightbulb, Plus, Tag, Trash2, X } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import Brand from './Brand';
 
@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { to: '/trash', label: 'Trash', icon: Trash2, key: 'trashed' },
   { to: '/reminders', label: 'Reminders', icon: Bell, key: 'reminders' },
   { to: '/labels', label: 'Labels', icon: Tag, key: 'labels' },
+  { to: '/import', label: 'Import', icon: FileUp },
 ];
 
 export default function Sidebar({
