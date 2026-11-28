@@ -46,6 +46,20 @@ describe('useReminderAlerts', () => {
     expect(mocks.showToast).toHaveBeenCalledOnce();
   });
 
+  it('alerts again when the same reminder is rescheduled and becomes due', () => {
+    const firstDue = new Date(Date.now() - 2000);
+    const secondDue = new Date(Date.now() - 1000);
+    const reminder = { id: 9, noteId: 1, reminderTime: localDateTime(firstDue) };
+    const view = render(<Harness reminders={[reminder]} />);
+    expect(mocks.showToast).toHaveBeenCalledOnce();
+
+    view.rerender(
+      <Harness reminders={[{ ...reminder, reminderTime: localDateTime(secondDue) }]} />,
+    );
+
+    expect(mocks.showToast).toHaveBeenCalledTimes(2);
+  });
+
   it('ignores future reminders', () => {
     const future = new Date(Date.now() + 60 * 60 * 1000);
     render(<Harness reminders={[{ id: 8, noteId: 1, reminderTime: localDateTime(future) }]} />);
